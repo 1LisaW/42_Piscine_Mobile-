@@ -1,9 +1,14 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
 import 'package:medium_weather_app/constants/text_constants.dart';
+import 'package:medium_weather_app/services/get_location_info.dart';
+import 'package:medium_weather_app/models/location.dart';
+import 'package:medium_weather_app/services/weather_api_service.dart';
 import 'package:medium_weather_app/widgets/screen_body.dart';
 import 'package:medium_weather_app/services/location_service.dart';
+import 'package:medium_weather_app/widgets/location_list.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -26,7 +31,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         brightness: Brightness.dark,
       ),
-      home: const MyHomePage(title: 'Flutter Example App'),
+      home: const MyHomePage(title: 'Medium Weather App'),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -42,38 +47,142 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
+  Location currentLocation = Location(
+    name: '',
+    admin1: '',
+    country: '',
+    latitude: 0.0,
+    longitude: 0.0,
+    isActualLocation: false,
+  );
+
+  void _setCurrentLocation(
+    String name,
+    String admin1,
+    String country,
+    double latitude,
+    double longitude,
+    bool? isActualLocation,
+  ) {
+    setState(() {
+      currentLocation = currentLocation.update(
+        name,
+        admin1,
+        country,
+        latitude,
+        longitude,
+        isActualLocation ?? true,
+      );
+
+      searchGeolocation = '';
+    });
+    textController.text = '';
+  }
+
+  void onTapLocation(Location location) {
+    _setCurrentLocation(
+      location.name,
+      location.admin1,
+      location.country,
+      location.latitude,
+      location.longitude,
+      true,
+    );
+    _setError(false, '');
+  }
+
+  void _setError(bool hasError, String? message) {
+    setState(() {
+      this.hasError = hasError;
+      errorMessage = message ?? '';
+    });
+  }
+
   late TabController tabController;
 
   bool hasError = false;
   String errorMessage = '';
 
-  String geolocation = 'Location not fetched';
+  // String geolocation = 'Location not fetched';
+
   Future<void> _getLocation() async {
-    hasError = false;
-    errorMessage = '';
     try {
-      final position = await LocationService.determinePosition();
-      setState(() {
-        geolocation = '${position.latitude},${position.longitude}';
-        searchGeolocation = geolocation;
-      });
+      final Position position = await LocationService.determinePosition();
+      //TODO: commented out for ex00 to show the coordinates only, uncomment for ex01 to show the location name
+
+      // final locationInfo = await getLocationInfo(
+      //   position.latitude,
+      //   position.longitude,
+      // );
+
+      _setError(false, '');
+      _setCurrentLocation(
+      //TODO: commented out for ex00 to show the coordinates only, uncomment for ex01 to show the location name
+        '','','',
+        // locationInfo?['city'] ?? '',
+        // locationInfo?['admin1'] ?? '',
+        // locationInfo?['country'] ?? '',
+        position.latitude,
+        position.longitude,
+        true,
+      );
+    } on ClientException catch (_) {
+      _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
+      _setError(true, TextConstants.errorConnectionLost);
     } catch (e) {
-      setState(() {
-        geolocation = 'Error: $e';
-        hasError = true;
-        errorMessage = e.toString();
-      });
+      _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
+      _setError(true, e.toString());
+    }
+  }
+
+  void onSubmitSearch(String text) async {
+    if (text.isNotEmpty) {
+      try {
+        final locations = await WeatherApiService.fetchLocations(text);
+        if (locations.isNotEmpty) {
+          final location = locations.first;
+          _setCurrentLocation(
+            location.name,
+            location.admin1,
+            location.country,
+            location.latitude,
+            location.longitude,
+            true,
+          );
+          _setError(false, '');
+        } else {
+          _setCurrentLocation('No results', '', '', 0.0, 0.0, false);
+          _setError(true, TextConstants.errorNoResults);
+        }
+      } on ClientException catch (_) {
+        _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
+        _setError(true, TextConstants.errorConnectionLost);
+      } catch (e) {
+        _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
+        _setError(true, e.toString());
+      }
     }
   }
 
   String searchGeolocation = '';
+
+  void onSearchChanged(String text) {
+    if (textController.text.length > 2) {
+      setState(() {
+        searchGeolocation = textController.text;
+      });
+    } else if (searchGeolocation.isNotEmpty) {
+      setState(() {
+        searchGeolocation = '';
+      });
+    }
+  }
 
   final textController = TextEditingController();
 
   @override
   void initState() {
     tabController = TabController(length: 3, vsync: this);
-    tabController.addListener(() => {setState(() => {})});
     super.initState();
   }
 
@@ -84,10 +193,19 @@ class _MyHomePageState extends State<MyHomePage>
     super.dispose();
   }
 
+  double responsiveHeight(BuildContext context) {
+    final height = MediaQuery.of(context).size.height;
+    if (height < 700) {
+      return height - 175;
+    }
+    return 500;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        toolbarHeight: 75,
         backgroundColor: Colors.grey,
         foregroundColor: Colors.grey.shade300,
         title: Container(
@@ -112,14 +230,8 @@ class _MyHomePageState extends State<MyHomePage>
                 color: Color.fromARGB(255, 228, 224, 224),
               ),
             ),
-            onSubmitted: (text) {
-              setState(() {
-                hasError = false;
-                errorMessage = '';
-                searchGeolocation = text;
-                textController.text = '';
-              });
-            },
+            onChanged: onSearchChanged,
+            onSubmitted: onSubmitSearch,
           ),
         ),
         actions: <Widget>[
@@ -129,10 +241,10 @@ class _MyHomePageState extends State<MyHomePage>
             icon: const Icon(Icons.near_me, color: Colors.white),
             onPressed: _getLocation,
           ),
-          // )
         ],
       ),
       bottomNavigationBar: BottomAppBar(
+        height: 100,
         surfaceTintColor: Colors.white,
 
         child: TabBar(
@@ -171,30 +283,50 @@ class _MyHomePageState extends State<MyHomePage>
           controller: tabController,
         ),
       ),
-      body: TabBarView(
-        controller: tabController,
+      body: Stack(
         children: [
-          ScreenBody(
-            tabBarTitle: TextConstants.titleTab_1,
-            tabBarGeoposition: searchGeolocation,
-            tabController: tabController,
-            hasError: hasError,
-            errorMessage: errorMessage,
+          TabBarView(
+            controller: tabController,
+            children: [
+              ScreenBody(
+                tabBarTitle: TextConstants.titleTab_1,
+                tabBarGeoposition: currentLocation,
+                tabController: tabController,
+                hasError: hasError,
+                errorMessage: errorMessage,
+              ),
+              ScreenBody(
+                tabBarTitle: TextConstants.titleTab_2,
+                tabBarGeoposition: currentLocation,
+                tabController: tabController,
+                hasError: hasError,
+                errorMessage: errorMessage,
+              ),
+              ScreenBody(
+                tabBarTitle: TextConstants.titleTab_3,
+                tabBarGeoposition: currentLocation,
+                tabController: tabController,
+                hasError: hasError,
+                errorMessage: errorMessage,
+              ),
+            ],
           ),
-          ScreenBody(
-            tabBarTitle: TextConstants.titleTab_2,
-            tabBarGeoposition: searchGeolocation,
-            tabController: tabController,
-            hasError: hasError,
-            errorMessage: errorMessage,
-          ),
-          ScreenBody(
-            tabBarTitle: TextConstants.titleTab_3,
-            tabBarGeoposition: searchGeolocation,
-            tabController: tabController,
-            hasError: hasError,
-            errorMessage: errorMessage,
-          ),
+
+          if (searchGeolocation.isNotEmpty) //&& _focusNode.hasFocus)
+            Positioned(
+              top: 0,
+              left: 0,
+
+              // right: 0,
+              child: SizedBox(
+                height: responsiveHeight(context),
+                width: min<double>(MediaQuery.of(context).size.width, 500),
+                child: LocationListWidget(
+                  query: searchGeolocation,
+                  onTapLocation: onTapLocation,
+                ),
+              ),
+            ),
         ],
       ),
     );
