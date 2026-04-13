@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants/text_constants.dart';
-import 'package:flutter_app/widgets/screen_body.dart';
+import 'package:weather_app/constants/text_constants.dart';
+import 'package:weather_app/widgets/screen_body.dart';
 
 void main() {
   runApp(const MyApp());
