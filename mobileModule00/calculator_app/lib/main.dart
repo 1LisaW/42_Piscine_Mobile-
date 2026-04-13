@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 // import 'package:math_expressions/math_expressions.dart';
 
 final ColorScheme colorScheme = ColorScheme(
@@ -36,9 +37,11 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: Colors.blue,
+        // colorSchemeSeed: Colors.blue,
         useMaterial3: true,
-        brightness: Brightness.dark,
+        colorScheme: colorScheme,
+        brightness: Brightness.light,
+        // brightness: Brightness.dark,
       ),
       home: const MyHomePage(title: 'Calculator'),
       debugShowCheckedModeBanner: false,
@@ -55,10 +58,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _position = 0;
-  List<String> _output = [];
   var _input = '0';
   var _result = '0';
+  bool _justEvaluated = false;
 
   final List<String> buttons = [
     '7',
@@ -177,147 +179,77 @@ class _MyHomePageState extends State<MyHomePage> {
     return false;
   }
 
-  void updateOutput(int idx, String value) {
-    while (_output.length < idx + 1) {
-      _output.add('');
-    }
-    _output[idx] = value;
-  }
-
   void fillNumber(String ch) {
-    String finaluserinput;
-    if (_position == 1 || _position == 3) {
-      setState(() {
-        _input = '0';
-      });
-    }
-    if (_position == 1 && _output[1] != '=') {
-      setState(() {
-        _position = 2;
-      });
-    }
-
-    if (ch == '.' && _input.indexOf(ch) != -1)
-      finaluserinput = _input;
-    else if (_input == '0' && ch != '.')
-      finaluserinput = ch[0];
-    else
-      finaluserinput = _input + ch;
-
     setState(() {
-      _input = finaluserinput;
-    });
-  }
-
-  void updateResult() {
-    if (_position >= 0)
-      setState(() {
-        _result = _output.sublist(0, _position + 1).join(' ');
-      });
-    else
-      setState(() {
+      if (_justEvaluated) {
+        _input = '0';
         _result = '';
-      });
+        _justEvaluated = false;
+      }
+
+      if (_input == '0' && ch != '.') {
+        _input = ch;
+      } else {
+        _input += ch;
+      }
+    });
   }
 
   void clearAll() {
     setState(() {
       _input = '0';
-      _position = 0;
-      _output.clear();
-      _result = '';
+      _result = '0';
     });
   }
 
   void clearInput() {
     setState(() {
       _input = '0';
-      if (_position == 2) _position = 1;
     });
   }
 
-  void updateInvalidInput() {
-    try {
-      double.parse(_input);
-    } catch (e) {
-      setState(() {
-        _input = '0';
-        _position = 0;
-        _output.clear();
-      });
-    }
-  }
-
   void fillOperator(String ch) {
-    updateInvalidInput();
     if (ch == '=') {
       equalPressed();
       return;
     }
-    if (_position == 2) {
-      updateOutput(2, _input);
-      calculateResult();
-    }
+
     setState(() {
-      updateOutput(0, _input);
-      updateOutput(1, ch);
-      _position = 1;
-      updateResult();
+      if (_justEvaluated) {
+        _result = '';
+        _justEvaluated = false;
+      }
+
+      if (_input.isNotEmpty &&
+          ['+', '-', '*', '/'].contains(_input[_input.length - 1])) {
+        _input = _input.substring(0, _input.length - 1) + ch;
+      } else {
+        _input += ch;
+      }
     });
   }
-
-  void calculateResult() {
-    double result = 0;
-
-    if (_output.length < 3) {
-      try {
-        double firstNumber = double.parse(_output[0]);
-        result = firstNumber;
-        setState(() {
-          _input = result.toString();
-        });
-      } catch (e) {
-        setState(() {
-          _input = 'Error';
-        });
-      }
-    } else {
-      try {
-        double firstNumber = double.parse(_output[0]);
-        double secondNumber = double.parse(_output[2]);
-        if (_output[1] == '+') {
-          result = firstNumber + secondNumber;
-        } else if (_output[1] == '-') {
-          result = firstNumber - secondNumber;
-        } else if (_output[1] == '*') {
-          result = firstNumber * secondNumber;
-        } else if (_output[1] == '/') {
-          result = firstNumber / secondNumber;
-        }
-        setState(() {
-          _input = result.toString();
-        });
-      } catch (e) {
-        setState(() {
-          _input = 'Error';
-        });
-      }
-    }
-    updateResult();
-  }
-
+  
   void equalPressed() {
-    if (_output.length <= 1) {
-      updateOutput(0, _input);
-      updateOutput(1, '=');
-    } else if (_position != 3 && _output[1] != '=') {
-      updateOutput(2, _input);
-      updateOutput(3, '=');
-    } else {
-      updateOutput(0, _input);
+    try {
+      String expression = _input;
+
+      Parser p = Parser();
+      Expression exp = p.parse(expression);
+      ContextModel cm = ContextModel();
+
+      double eval = exp.evaluate(EvaluationType.REAL, cm);
+
+      setState(() {
+        _result = expression;
+        _input = eval.toString();
+        _justEvaluated = true;
+      });
+    } catch (e) {
+      setState(() {
+        _input = 'Error';
+        _justEvaluated = true;
+      });
     }
-    _position = _output.indexOf('=');
-    calculateResult();
   }
 }
 
