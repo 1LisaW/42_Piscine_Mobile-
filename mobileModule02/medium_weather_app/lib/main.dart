@@ -27,9 +27,9 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: Colors.blue,
+        colorSchemeSeed: Colors.indigo,
         useMaterial3: true,
-        brightness: Brightness.dark,
+        brightness: Brightness.light,
       ),
       home: const MyHomePage(title: 'Medium Weather App'),
       debugShowCheckedModeBanner: false,
