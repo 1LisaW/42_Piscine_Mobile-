@@ -1,6 +1,7 @@
 import 'package:diary_app/features/auth/auth_controller.dart';
 import 'package:diary_app/models/diary_entry.dart';
 import 'package:diary_app/providers/diary_providers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final entriesAsync = ref.watch(diaryEntriesProvider);
+    final User? user = ref.read(authStateProvider).value;
 
     return Scaffold(
       body: IndexedStack(
@@ -32,6 +34,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           _ProfileTab(
             entriesAsync: entriesAsync,
             onOpenEntry: (entry) => _showReadEntryDialog(context, entry),
+            user: user,
           ),
           const _CalendarPlaceholder(),
         ],
@@ -177,7 +180,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   onPressed: () async {
                     final title = titleCtrl.text.trim();
                     if (title.isEmpty) return;
-                    await ref.read(diaryServiceProvider).addEntry(
+                    await ref
+                        .read(diaryServiceProvider)
+                        .addEntry(
                           email: email,
                           title: title,
                           body: bodyCtrl.text.trim(),
@@ -222,10 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           title: Text(
             dateStr,
-            style: const TextStyle(
-              fontFamily: 'DancingScript',
-              fontSize: 20,
-            ),
+            style: const TextStyle(fontFamily: 'DancingScript', fontSize: 20),
           ),
           content: SingleChildScrollView(
             child: Column(
@@ -260,7 +262,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           actions: [
             TextButton(
               onPressed: () async {
-                await ref.read(diaryServiceProvider).deleteEntry(email, entry.id);
+                await ref
+                    .read(diaryServiceProvider)
+                    .deleteEntry(email, entry.id);
                 if (ctx.mounted) Navigator.of(ctx).pop();
               },
               child: const Text(
@@ -283,19 +287,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+class Profile_Info extends StatelessWidget {
+  const Profile_Info({this.user});
+  final User? user;
+  static const IconData logout = IconData(0xe3b3, fontFamily: 'MaterialIcons');
+
+  @override
+  Widget build(BuildContext context) {
+    return (
+      Padding(
+        padding: EdgeInsetsGeometry.all(10),
+        child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        CircleAvatar(
+          backgroundColor: const Color.fromARGB(255, 30, 94, 44),
+          foregroundColor: Colors.white,
+          radius: 40,
+          child: const Text('AH', style: TextStyle(fontSize: 28),),
+        ),
+        Text(user?.email ?? '', style: TextStyle(fontSize: 20)),
+        Icon(logout)
+      ],
+    ),
+      ));
+  }
+}
+
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab({
     required this.entriesAsync,
     required this.onOpenEntry,
+    this.user,
   });
 
   final AsyncValue<List<DiaryEntry>> entriesAsync;
   final void Function(DiaryEntry) onOpenEntry;
+  final User? user;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        if (user != null) Profile_Info(user: user,),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -335,10 +369,7 @@ class _ProfileTab extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
                   final e = entries[i];
-                  return _DiaryListTile(
-                    entry: e,
-                    onTap: () => onOpenEntry(e),
-                  );
+                  return _DiaryListTile(entry: e, onTap: () => onOpenEntry(e));
                 },
               );
             },
@@ -352,10 +383,7 @@ class _ProfileTab extends StatelessWidget {
 }
 
 class _DiaryListTile extends StatelessWidget {
-  const _DiaryListTile({
-    required this.entry,
-    required this.onTap,
-  });
+  const _DiaryListTile({required this.entry, required this.onTap});
 
   final DiaryEntry entry;
   final VoidCallback onTap;

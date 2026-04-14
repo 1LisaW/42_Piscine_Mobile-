@@ -1,3 +1,4 @@
+import 'package:diary_app/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:diary_app/features/auth/auth_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       next.whenOrNull(
         data: (_) {
           // Handle successful login (e.g., navigate to home screen)
+          Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => const HomeScreen()),);
         },
         loading: () {
           // Show loading indicator
