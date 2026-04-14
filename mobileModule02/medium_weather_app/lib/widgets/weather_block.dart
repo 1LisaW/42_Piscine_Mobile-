@@ -72,13 +72,21 @@ class CurrentWeatherBlock extends StatefulWidget {
 class _CurrentWeatherBlockState extends State<CurrentWeatherBlock> {
   late Future<CurrentWeatherData> currentWeatherData;
 
+  Future<CurrentWeatherData> _fetchCurrentWeather() async {
+    try {
+      return await WeatherApiService.fetchCurrentWeather(
+        widget.location.latitude,
+        widget.location.longitude,
+      );
+    } catch (_) {
+      throw TextConstants.errorConnectionLost;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    currentWeatherData = WeatherApiService.fetchCurrentWeather(
-      widget.location.latitude,
-      widget.location.longitude,
-    );
+    currentWeatherData = _fetchCurrentWeather();
   }
 
   @override
@@ -87,10 +95,7 @@ class _CurrentWeatherBlockState extends State<CurrentWeatherBlock> {
     if (oldWidget.location.latitude != widget.location.latitude ||
         oldWidget.location.longitude != widget.location.longitude) {
       setState(() {
-        currentWeatherData = WeatherApiService.fetchCurrentWeather(
-          widget.location.latitude,
-          widget.location.longitude,
-        );
+        currentWeatherData = _fetchCurrentWeather();
       });
     }
   }
@@ -117,7 +122,9 @@ class _CurrentWeatherBlockState extends State<CurrentWeatherBlock> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('${snapshot.error}', style: const TextStyle(color: Colors.red, fontSize: 18),),
+            );
           } else if (snapshot.hasData) {
             final weather = snapshot.data!;
             return Center(
@@ -125,30 +132,7 @@ class _CurrentWeatherBlockState extends State<CurrentWeatherBlock> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   LocationWeatherBlock(location: widget.location, type: TextConstants.titleTab_1),
-                  // Text(
-                  //   widget.location.name,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.bold,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
-                  // if (widget.location.admin1.isNotEmpty)
-                  //   Text(
-                  //     widget.location.admin1,
-                  //     style: const TextStyle(
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.normal,
-                  //     ),
-                  //   ),
-                  // Text(
-                  //   widget.location.country,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.normal,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 16),
+ 
                   Text(
                     '${weather.currentTemperature}°C',
                     style: const TextStyle(fontSize: 16),
@@ -234,33 +218,6 @@ class _TodayWeatherBlockState extends State<TodayWeatherBlock> {
               child: Column(
                 children: [
                   LocationWeatherBlock(location: widget.location, type: TextConstants.titleTab_2),
-
-                  // Container(
-                  //   padding: const EdgeInsets.only(top: 16.0),
-                  //   child: Text(
-                  //     widget.location.name,
-                  //     style: const TextStyle(
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.normal,
-                  //     ),
-                  //   ),
-                  // ),
-                  // if (widget.location.admin1.isNotEmpty)
-                  //   Text(
-                  //     widget.location.admin1,
-                  //     style: const TextStyle(
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.normal,
-                  //     ),
-                  //   ),
-                  // Text(
-                  //   widget.location.country,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.normal,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
                   Expanded(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: 600),
@@ -374,33 +331,6 @@ class _WeeklyWeatherBlockState extends State<WeeklyWeatherBlock> {
               child: Column(
                 children: [
                   LocationWeatherBlock(location: widget.location, type: TextConstants.titleTab_3),
-
-                  // Container(
-                  //   padding: const EdgeInsets.only(top: 16.0),
-                  //   child: Text(
-                  //     widget.location.name,
-                  //     style: const TextStyle(
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.normal,
-                  //     ),
-                  //   ),
-                  // ),
-                  // if (widget.location.admin1.isNotEmpty)
-                  //   Text(
-                  //     widget.location.admin1,
-                  //     style: const TextStyle(
-                  //       fontSize: 18,
-                  //       fontWeight: FontWeight.normal,
-                  //     ),
-                  //   ),
-                  // Text(
-                  //   widget.location.country,
-                  //   style: const TextStyle(
-                  //     fontSize: 18,
-                  //     fontWeight: FontWeight.normal,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
                   Expanded(
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: 600),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
 import 'package:medium_weather_app/constants/text_constants.dart';
-import 'package:medium_weather_app/services/get_location_info.dart';
 import 'package:medium_weather_app/models/location.dart';
 import 'package:medium_weather_app/services/weather_api_service.dart';
 import 'package:medium_weather_app/widgets/screen_body.dart';
@@ -103,18 +102,10 @@ class _MyHomePageState extends State<MyHomePage>
   bool hasError = false;
   String errorMessage = '';
 
-  // String geolocation = 'Location not fetched';
 
   Future<void> _getLocation() async {
     try {
       final Position position = await LocationService.determinePosition();
-      //TODO: commented out for ex00 to show the coordinates only, uncomment for ex01 to show the location name
-
-      // final locationInfo = await getLocationInfo(
-      //   position.latitude,
-      //   position.longitude,
-      // );
-
       _setError(false, '');
       _setCurrentLocation(
       //TODO: commented out for ex00 to show the coordinates only, uncomment for ex01 to show the location name
@@ -127,11 +118,11 @@ class _MyHomePageState extends State<MyHomePage>
         true,
       );
     } on ClientException catch (_) {
-      _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
-      _setError(true, TextConstants.errorConnectionLost);
+        _setCurrentLocation('No results', '', '', 0.0, 0.0, false);
+        _setError(true, TextConstants.errorConnectionLost);
     } catch (e) {
-      _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
-      _setError(true, e.toString());
+       _setCurrentLocation('No results', '', '', 0.0, 0.0, false);
+        _setError(true, TextConstants.errorConnectionLost);
     }
   }
 
@@ -159,7 +150,8 @@ class _MyHomePageState extends State<MyHomePage>
         _setError(true, TextConstants.errorConnectionLost);
       } catch (e) {
         _setCurrentLocation('Error', '', '', 0.0, 0.0, false);
-        _setError(true, e.toString());
+        _setError(true, TextConstants.errorConnectionLost);
+
       }
     }
   }
