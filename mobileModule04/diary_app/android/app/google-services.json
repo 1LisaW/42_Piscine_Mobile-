@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "231327174176",
+    "project_id": "diary-app-42-mobile-piscine",
+    "storage_bucket": "diary-app-42-mobile-piscine.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231327174176:android:fcc8f9d175ac8bf28d3645",
+        "android_client_info": {
+          "package_name": "com.example.diary_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqdJw8bVraRucPvJQY_DchIjWODR8GA3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
