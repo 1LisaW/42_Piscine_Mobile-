@@ -122,7 +122,7 @@ class _MyHomePageState extends State<MyHomePage>
         _setError(true, TextConstants.errorConnectionLost);
     } catch (e) {
        _setCurrentLocation('No results', '', '', 0.0, 0.0, false);
-        _setError(true, TextConstants.errorConnectionLost);
+       _setError(true, e.toString());
     }
   }
 
