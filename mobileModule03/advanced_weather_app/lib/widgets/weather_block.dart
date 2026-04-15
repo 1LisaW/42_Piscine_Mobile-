@@ -20,7 +20,7 @@ class FrostedPanel extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(20),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
         child: Container(
           width: double.infinity,
           padding: padding ?? const EdgeInsets.all(20),
@@ -192,88 +192,100 @@ class _CurrentWeatherBlockState extends State<CurrentWeatherBlock> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
+              // flex: 3,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
                 child: FrostedPanel(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      LocationHeader(
-                        location: widget.location,
-                        // subtitle: TextConstants.titleTab_1,
-                      ),
-                      const SizedBox(height: 44),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(width: 20),
-                          Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return SingleChildScrollView(
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight,
+                          ),
+                          child: Center(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  '${weather.currentTemperature.toStringAsFixed(1)}°C',
-                                  style: TextStyle(
-                                    color: weather.currentTemperature > 0
-                                        ? Colors.orange
-                                        : Colors.blue,
-                                    fontSize: 44,
-                                    fontWeight: FontWeight.w300,
-                                    height: 1,
+                              LocationHeader(
+                                location: widget.location,
+                              ),
+                              const SizedBox(height: 44),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(width: 20),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          '${weather.currentTemperature.toStringAsFixed(1)}°C',
+                                          style: TextStyle(
+                                            color: weather.currentTemperature > 0
+                                                ? Colors.orange
+                                                : Colors.blue,
+                                            fontSize: 44,
+                                            fontWeight: FontWeight.w300,
+                                            height: 1,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 28),
+                                        Text(
+                                          weather.getWeatherDescription(
+                                            weather.currentWeatherCodeDescription,
+                                          ),
+                                          style: TextStyle(
+                                            color: Colors.white
+                                                .withValues(alpha: 0.95),
+                                            fontSize: 17,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        Icon(icon, size: 72, color: Colors.blue),
+                                        const SizedBox(height: 48),
+                                      ],
+                                    ),
                                   ),
+                                ],
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
                                 ),
-                                const SizedBox(height: 28),
-                                Text(
-                                  weather.getWeatherDescription(
-                                    weather.currentWeatherCodeDescription,
-                                  ),
-                                  style: TextStyle(
-                                    color: Colors.white.withValues(alpha: 0.95),
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-
-                          Icon(icon, size: 72, color: Colors.blue),
-                                const SizedBox(height: 48),
-
-
-                              ],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.air_rounded,
+                                      color: Colors.white.withValues(alpha: 0.9),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      'Wind ${weather.currentWindSpeed.toStringAsFixed(1)} km/h',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                             ),
                           ),
-                        ],
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
                         ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.air_rounded,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              'Wind ${weather.currentWindSpeed.toStringAsFixed(1)} km/h',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const Spacer(),
-
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -355,13 +367,15 @@ class _TodayWeatherBlockState extends State<TodayWeatherBlock> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
               child: FrostedPanel(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     LocationHeader(
                       location: widget.location,
                       // subtitle: TextConstants.titleTab_2,
                     ),
-                    const SizedBox(height: 8),
+                    
+                    if (MediaQuery.orientationOf(context) ==
+                        Orientation.portrait) ...[
+                          const SizedBox(height: 8),
                     Text(
                       'Today temperatures',
                       style: TextStyle(
@@ -369,8 +383,9 @@ class _TodayWeatherBlockState extends State<TodayWeatherBlock> {
                         fontSize: 14,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TodayTemperatureChart(data: weather),
+                      const SizedBox(height: 12),
+                      TodayTemperatureChart(data: weather),
+                    ],
                   ],
                 ),
               ),
@@ -520,7 +535,10 @@ class _WeeklyWeatherBlockState extends State<WeeklyWeatherBlock> {
                       location: widget.location,
                       // subtitle: TextConstants.titleTab_3,
                     ),
-                    const SizedBox(height: 8),
+                   
+                     if (MediaQuery.orientationOf(context) ==
+                        Orientation.portrait) ...[
+                           const SizedBox(height: 8),
                     Row(
                       children: [
                         _LegendDot(color: const Color(0xFFFF8A65), label: 'Max'),
@@ -530,6 +548,7 @@ class _WeeklyWeatherBlockState extends State<WeeklyWeatherBlock> {
                     ),
                     const SizedBox(height: 12),
                     WeeklyMinMaxChart(data: weather),
+                        ]
                   ],
                 ),
               ),

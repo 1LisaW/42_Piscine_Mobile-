@@ -74,7 +74,7 @@ class _LocationListWidgetState extends State<LocationListWidget> {
 
         return ListView.separated(
           shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          physics: const ScrollPhysics(),
           padding: EdgeInsets.zero,
           itemCount: list.length,
           separatorBuilder: (context, index) => Divider(
@@ -88,13 +88,13 @@ class _LocationListWidgetState extends State<LocationListWidget> {
                 : location.country;
 
             return Material(
-              color: Colors.transparent,
+              color: Colors.grey.shade800,
               child: InkWell(
                 onTap: () => widget.onTapLocation(location),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 14,
+                    vertical: 5,
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,

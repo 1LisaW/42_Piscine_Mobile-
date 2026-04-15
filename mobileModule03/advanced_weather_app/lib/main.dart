@@ -6,10 +6,15 @@ import 'package:advanced_weather_app/services/weather_api_service.dart';
 import 'package:advanced_weather_app/widgets/location_list.dart';
 import 'package:advanced_weather_app/widgets/screen_body.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:geolocator/geolocator.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
+    DeviceOrientation.portraitUp,
+  ]);
   runApp(const MyApp());
 }
 
