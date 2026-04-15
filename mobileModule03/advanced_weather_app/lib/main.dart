@@ -5,10 +5,12 @@ import 'package:advanced_weather_app/services/location_service.dart';
 import 'package:advanced_weather_app/services/weather_api_service.dart';
 import 'package:advanced_weather_app/widgets/location_list.dart';
 import 'package:advanced_weather_app/widgets/screen_body.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:geolocator/geolocator.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,12 +20,22 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
+
+class MyCustomScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse, // 👈 enables mouse drag
+      };
+}
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      scrollBehavior: MyCustomScrollBehavior(),
       title: 'Advanced Weather',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -81,7 +93,7 @@ class _MyHomePageState extends State<MyHomePage>
   }
 
   void onTapLocation(Location location) {
-    _setCurrentLocation(
+   _setCurrentLocation(
       location.name,
       location.admin1,
       location.country,
@@ -253,46 +265,50 @@ class _MyHomePageState extends State<MyHomePage>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Text(
-                          //   'Weather',
-                          //   style: TextStyle(
-                          //     color: Colors.white.withValues(alpha: 0.85),
-                          //     fontSize: 13,
-                          //     fontWeight: FontWeight.w600,
-                          //     letterSpacing: 0.4,
-                          //   ),
-                          // ),
                           const SizedBox(height: 16),
-                          Material(
-                            color: Colors.white.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(16),
-                            clipBehavior: Clip.antiAlias,
-                            child: TextField(
-                              controller: textController,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  onSubmitSearch(searchGeolocation);
+                                },
+                                icon: Icon(Icons.search_rounded),
                               ),
-                              cursorColor: Colors.white,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                hintText: TextConstants.searchHint,
-                                hintStyle: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.45),
-                                ),
-                                prefixIcon: Icon(
-                                  Icons.search_rounded,
-                                  color: Colors.white.withValues(alpha: 0.75),
-                                ),
-                                border: InputBorder.none,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                  vertical: 14,
+                              Expanded(
+                                child: Material(
+                                  color: Colors.white.withValues(alpha: 0.14),
+                                  borderRadius: BorderRadius.circular(16),
+                                  clipBehavior: Clip.antiAlias,
+                                  child: TextField(
+                                    controller: textController,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
+                                    cursorColor: Colors.white,
+                                    decoration: InputDecoration(
+                                      isDense: true,
+                                      hintText: TextConstants.searchHint,
+                                      hintStyle: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.45,
+                                        ),
+                                      ),
+
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                            vertical: 14,
+                                          ),
+                                    ),
+                                    onChanged: onSearchChanged,
+                                    onSubmitted: onSubmitSearch,
+                                  ),
                                 ),
                               ),
-                              onChanged: onSearchChanged,
-                              onSubmitted: onSubmitSearch,
-                            ),
+                            ],
                           ),
                         ],
                       ),
