@@ -1,6 +1,7 @@
 import 'package:diary_app/features/auth/auth_controller.dart';
 import 'package:diary_app/models/diary_entry.dart';
 import 'package:diary_app/providers/diary_providers.dart';
+import 'package:diary_app/widgets/profile_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -287,33 +288,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class Profile_Info extends StatelessWidget {
-  const Profile_Info({this.user});
-  final User? user;
-  static const IconData logout = IconData(0xe3b3, fontFamily: 'MaterialIcons');
-
-  @override
-  Widget build(BuildContext context) {
-    return (
-      Padding(
-        padding: EdgeInsetsGeometry.all(10),
-        child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        CircleAvatar(
-          backgroundColor: const Color.fromARGB(255, 30, 94, 44),
-          foregroundColor: Colors.white,
-          radius: 40,
-          child: const Text('AH', style: TextStyle(fontSize: 28),),
-        ),
-        Text(user?.email ?? '', style: TextStyle(fontSize: 20)),
-        Icon(logout)
-      ],
-    ),
-      ));
-  }
-}
-
 class _ProfileTab extends StatelessWidget {
   const _ProfileTab({
     required this.entriesAsync,
@@ -329,10 +303,12 @@ class _ProfileTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        if (user != null) Profile_Info(user: user,),
+        if (user != null) Profile_Info(user: user),
         Container(
+          margin: EdgeInsetsGeometry.symmetric(horizontal: 10),
           width: double.infinity,
           padding: const EdgeInsets.symmetric(vertical: 20),
+
           color: _kMintHeader,
           child: SafeArea(
             bottom: false,
@@ -365,7 +341,7 @@ class _ProfileTab extends StatelessWidget {
               }
               return ListView.separated(
                 padding: const EdgeInsets.all(16),
-                itemCount: entries.length,
+                itemCount: entries.length < 2 ? entries.length : 2,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
                   final e = entries[i];
@@ -377,7 +353,108 @@ class _ProfileTab extends StatelessWidget {
             error: (err, _) => Center(child: Text('Error: $err')),
           ),
         ),
+        // Expanded(
+        //   child: Column(
+        //     children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          margin: EdgeInsetsGeometry.symmetric(horizontal: 10),
+          color: const Color.fromARGB(255, 134, 245, 60),
+          child: SafeArea(
+            bottom: false,
+            child: Text(
+              'Your feel for your 7 entries',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'DancingScript',
+                fontSize: 26,
+                color: Colors.grey.shade900,
+              ),
+            ),
+          ),
+        ),
+        // ],
+        // ),
+        // ),
+        Expanded(
+          child: entriesAsync.when(
+            data: (entries) {
+              if (entries.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No entries yet.\nTap “New diary entry”.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'DancingScript',
+                      fontSize: 18,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                );
+              }
+              return ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: entries.length < 7 ? entries.length : 7,
+                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                itemBuilder: (context, i) {
+                  final e = entries[i];
+                  final filteredEntr = entries.where(
+                    (element) => element.moodIndex == e.moodIndex,
+                  );
+                  final int percent = (filteredEntr.length * 100 / entries.length)
+                      .truncate();
+                  return _FeelTile(moodIndex: e.moodIndex, percent: percent);
+
+                  //_DiaryListTile(entry: e, onTap: () => onOpenEntry(e));
+                },
+              );
+            },
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (err, _) => Center(child: Text('Error: $err')),
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _FeelTile extends StatelessWidget {
+  const _FeelTile({required this.moodIndex, required this.percent});
+
+  final int moodIndex;
+  final int percent;
+
+  @override
+  Widget build(BuildContext context) {
+    final mood = kMoodEmojis[moodIndex.clamp(0, kMoodEmojis.length - 1)];
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(mood, style: const TextStyle(fontSize: 28)),
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 10),
+            width: 1,
+            height: 52,
+            color: Colors.grey.shade400,
+          ),
+          Expanded(
+            child: Text(
+              '${percent} %',
+              style: TextStyle(
+                fontFamily: 'DancingScript',
+                fontSize: 20,
+                color: Colors.grey.shade900,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
