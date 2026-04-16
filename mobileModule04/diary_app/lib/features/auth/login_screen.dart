@@ -44,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
+            SizedBox(
               width: 300,
               child: TextField(
                 controller: _emailController,
@@ -52,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 contentPadding: EdgeInsets.all(10)),
               ),
             ),
-            Container(
+            SizedBox(
               width: 300,
               
               child: TextField(

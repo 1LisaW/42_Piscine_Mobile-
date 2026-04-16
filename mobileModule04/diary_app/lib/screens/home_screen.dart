@@ -394,19 +394,17 @@ class _ProfileTab extends StatelessWidget {
                 );
               }
               return ListView.separated(
-                padding: const EdgeInsets.all(16),
-                itemCount: entries.length < 7 ? entries.length : 7,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: kMoodEmojis.length,
+                separatorBuilder: (_, __) => const SizedBox(height: 5),
                 itemBuilder: (context, i) {
-                  final e = entries[i];
+                  final e = kMoodEmojis[i];
                   final filteredEntr = entries.where(
-                    (element) => element.moodIndex == e.moodIndex,
+                    (element) => element.moodIndex == i,
                   );
                   final int percent = (filteredEntr.length * 100 / entries.length)
                       .truncate();
-                  return _FeelTile(moodIndex: e.moodIndex, percent: percent);
-
-                  //_DiaryListTile(entry: e, onTap: () => onOpenEntry(e));
+                  return _FeelTile(moodIndex: i, percent: percent);
                 },
               );
             },
@@ -434,19 +432,19 @@ class _FeelTile extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(mood, style: const TextStyle(fontSize: 28)),
+          Text(mood, style: const TextStyle(fontSize: 25)),
           Container(
             margin: const EdgeInsets.symmetric(horizontal: 10),
             width: 1,
-            height: 52,
+            height: 32,
             color: Colors.grey.shade400,
           ),
           Expanded(
             child: Text(
-              '${percent} %',
+              '$percent %',
               style: TextStyle(
                 fontFamily: 'DancingScript',
-                fontSize: 20,
+                fontSize: 18,
                 color: Colors.grey.shade900,
               ),
               maxLines: 2,
