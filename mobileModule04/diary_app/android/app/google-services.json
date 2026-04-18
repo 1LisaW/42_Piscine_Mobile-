@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "231327174176",
+    "firebase_url": "https://diary-app-42-mobile-piscine-default-rtdb.firebaseio.com",
+    "project_id": "diary-app-42-mobile-piscine",
+    "storage_bucket": "diary-app-42-mobile-piscine.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231327174176:android:fcc8f9d175ac8bf28d3645",
+        "android_client_info": {
+          "package_name": "com.example.diary_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "231327174176-7mmn1g62qek6phump63nr8995p6gsqac.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.diary_app",
+            "certificate_hash": "e6459fc81be1e98535214db6eead8a08d82fc37f"
+          }
+        },
+        {
+          "client_id": "231327174176-ra5tpqnh9jn2b2qavhs1ll4o04oq330f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqdJw8bVraRucPvJQY_DchIjWODR8GA3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "231327174176-fkvosr8e4blo9qhefn4pm1vad4h729qa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "231327174176-jrtubgbrqpri6tnv0c8r8vf7mvn50th1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.diaryApp"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:231327174176:android:9cd33aa2c57e22d68d3645",
+        "android_client_info": {
+          "package_name": "com.example.diary_app_android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "231327174176-mup3jsltfr61rgqg4nup70q9ect69jec.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.diary_app_android",
+            "certificate_hash": "e6459fc81be1e98535214db6eead8a08d82fc37f"
+          }
+        },
+        {
+          "client_id": "231327174176-ra5tpqnh9jn2b2qavhs1ll4o04oq330f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAqdJw8bVraRucPvJQY_DchIjWODR8GA3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "231327174176-fkvosr8e4blo9qhefn4pm1vad4h729qa.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "231327174176-jrtubgbrqpri6tnv0c8r8vf7mvn50th1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.diaryApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
